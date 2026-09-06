@@ -5,7 +5,7 @@ For each trial event (start, completion, termination), computes:
   - Expected return estimated from 60-day pre-event window
   - Statistical significance (t-statistic)
 
-Results written to a CSV for Tableau visualization.
+Results written to CSV and Postgres for SQL analysis and Tableau visualization.
 """
 
 import psycopg2
@@ -22,12 +22,11 @@ DB_CONFIG = {
     "port": 5432,
 }
 
-ESTIMATION_WINDOW = 60   # trading days before event window
-EVENT_WINDOW = 2         # days before and after event date ([-2, +2])
+ESTIMATION_WINDOW = 60
+EVENT_WINDOW = 2
 
 
 def load_prices(conn):
-    """Load all stock prices into a DataFrame."""
     cur = conn.cursor()
     cur.execute("""
         SELECT ticker_symbol, price_date, close_price
@@ -44,7 +43,6 @@ def load_prices(conn):
 
 
 def load_events(conn):
-    """Load all trial events for publicly-traded sponsors."""
     cur = conn.cursor()
     cur.execute("""
         SELECT event_id, nct_id, ticker_symbol, sponsor_name,
@@ -61,7 +59,6 @@ def load_events(conn):
 
 
 def compute_daily_returns(prices_df):
-    """Compute daily log returns per ticker."""
     prices_df = prices_df.sort_values(["ticker_symbol", "price_date"])
     prices_df["log_return"] = prices_df.groupby("ticker_symbol")["close_price"].transform(
         lambda x: np.log(x / x.shift(1))
@@ -70,28 +67,21 @@ def compute_daily_returns(prices_df):
 
 
 def get_ticker_returns(prices_df, ticker):
-    """Get a date-indexed Series of log returns for one ticker."""
     df = prices_df[prices_df["ticker_symbol"] == ticker].copy()
     df = df.set_index("price_date")["log_return"].dropna()
     return df
 
 
 def compute_car(returns, event_date, estimation_window, event_window):
-    """
-    Compute Cumulative Abnormal Return (CAR) for one event.
-    Returns dict with CAR, expected return, t-stat, and metadata.
-    """
     event_date = pd.Timestamp(event_date)
     dates = returns.index
 
-    # Find position of event date or nearest trading day after
     future_dates = dates[dates >= event_date]
     if len(future_dates) == 0:
         return None
     actual_event_date = future_dates[0]
     event_pos = dates.get_loc(actual_event_date)
 
-    # Estimation window: 60 trading days before the event window
     est_start = event_pos - estimation_window - event_window
     est_end = event_pos - event_window
 
@@ -105,7 +95,6 @@ def compute_car(returns, event_date, estimation_window, event_window):
     if estimation_std == 0 or pd.isna(estimation_std):
         return None
 
-    # Event window: [-2, +2] trading days around event
     ew_start = event_pos - event_window
     ew_end = event_pos + event_window + 1
 
@@ -116,7 +105,6 @@ def compute_car(returns, event_date, estimation_window, event_window):
     abnormal_returns = event_returns - expected_return
     car = abnormal_returns.sum()
 
-    # t-statistic: CAR / (std * sqrt(window length))
     t_stat = car / (estimation_std * np.sqrt(len(event_returns)))
     p_value = 2 * (1 - stats.t.cdf(abs(t_stat), df=len(estimation_returns) - 1))
 
@@ -130,6 +118,65 @@ def compute_car(returns, event_date, estimation_window, event_window):
         "actual_event_date": actual_event_date.date(),
         "event_window_days": len(event_returns),
     }
+
+
+def create_results_table(cur):
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS event_study_results (
+            event_id INTEGER,
+            nct_id TEXT,
+            ticker_symbol TEXT,
+            sponsor_name TEXT,
+            event_type TEXT,
+            event_date DATE,
+            phase TEXT,
+            overall_status TEXT,
+            car NUMERIC(10,6),
+            expected_daily_return NUMERIC(10,6),
+            estimation_std NUMERIC(10,6),
+            t_stat NUMERIC(10,4),
+            p_value NUMERIC(10,4),
+            significant_5pct BOOLEAN,
+            actual_event_date DATE,
+            event_window_days INTEGER
+        )
+    """)
+    cur.execute("TRUNCATE event_study_results")
+
+
+def write_results_to_postgres(conn, results_df):
+    cur = conn.cursor()
+    create_results_table(cur)
+    for _, row in results_df.iterrows():
+        cur.execute("""
+            INSERT INTO event_study_results (
+                event_id, nct_id, ticker_symbol, sponsor_name,
+                event_type, event_date, phase, overall_status,
+                car, expected_daily_return, estimation_std,
+                t_stat, p_value, significant_5pct,
+                actual_event_date, event_window_days
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            int(row["event_id"]),
+            row["nct_id"],
+            row["ticker_symbol"],
+            row["sponsor_name"],
+            row["event_type"],
+            row["event_date"],
+            row["phase"],
+            row["overall_status"],
+            float(row["car"]),
+            float(row["expected_daily_return"]),
+            float(row["estimation_std"]),
+            float(row["t_stat"]),
+            float(row["p_value"]),
+            bool(row["significant_5pct"]),
+            row["actual_event_date"],
+            int(row["event_window_days"]),
+        ))
+    conn.commit()
+    cur.close()
+    print(f"Wrote {len(results_df)} rows to event_study_results table.")
 
 
 def main():
@@ -174,13 +221,11 @@ def main():
             **car_result,
         })
 
-    conn.close()
-
     results_df = pd.DataFrame(results)
+
     os.makedirs("exports", exist_ok=True)
     output_path = "exports/event_study_results.csv"
     results_df.to_csv(output_path, index=False)
-
     print(f"Done. {len(results_df)} events processed.")
     print(f"Results saved to {output_path}\n")
 
@@ -198,6 +243,11 @@ def main():
          "phase", "car", "t_stat", "p_value"]
     ]
     print(top_events.to_string(index=False))
+
+    print("\nWriting results to Postgres...")
+    write_results_to_postgres(conn, results_df)
+
+    conn.close()
 
 
 if __name__ == "__main__":
