@@ -1,0 +1,33 @@
+ticker_symbol,sponsor_name,event_count,mean_car,mean_abs_car,max_abs_car,significant_events
+PLRX,Pliant Therapeutics, Inc.,10,0.1121,0.1499,0.8038,1
+VICO.ST,Vicore Pharma AB,7,0.0567,0.0800,0.1944,2
+TBPH,Theravance Biopharma,3,0.0482,0.0715,0.1014,0
+MNOV,MediciNova,3,0.0203,0.0603,0.0857,0
+688062.SS,Mabwell (Shanghai) Bioscience Co., Ltd.,5,0.0177,0.0574,0.1327,1
+TRVI,Trevi Therapeutics,10,-0.0143,0.0557,0.1861,0
+ARWR,Arrowhead Pharmaceuticals,3,0.0493,0.0493,0.0686,0
+288330.KQ,Bridge Biotherapeutics, Inc.,3,0.0453,0.0453,0.0684,0
+069620.KS,Daewoong Pharmaceutical Co. LTD.,10,-0.0115,0.0450,0.1108,0
+MNKD,Mannkind Corporation,4,0.0369,0.0448,0.0977,0
+002653.SZ,Haisco Pharmaceutical Group Co., Ltd.,7,-0.0237,0.0440,0.0875,0
+MRK,Afferent Pharmaceuticals, Inc., a subsidiary of Merck & Co., Inc. (Rahway, New Jersey USA),6,-0.0207,0.0406,0.1545,2
+000210.KS,IlDong Pharmaceutical Co Ltd,3,0.0354,0.0354,0.0827,1
+AZN,MedImmune LLC,3,-0.0346,0.0346,0.0390,0
+UTHR,United Therapeutics,8,0.0108,0.0292,0.0604,0
+600276.SS,Guangdong Hengrui Pharmaceutical Co., Ltd,14,0.0205,0.0288,0.0976,2
+BMY,Bristol-Myers Squibb,12,-0.0001,0.0268,0.0961,1
+6988.T,Nitto Denko Corporation,3,-0.0263,0.0263,0.0380,0
+BIIB,Biogen,6,-0.0138,0.0261,0.0598,0
+BMY,Celgene,9,0.0129,0.0260,0.0545,0
+GSK,GlaxoSmithKline,21,0.0057,0.0242,0.0804,4
+AMGN,Amgen,3,-0.0232,0.0233,0.0506,1
+AZN,AstraZeneca,7,-0.0055,0.0208,0.0561,0
+3402.T,Toray Industries, Inc,3,-0.0195,0.0195,0.0205,0
+RHHBY,Hoffmann-La Roche,47,0.0007,0.0174,0.0704,4
+PFE,Global Blood Therapeutics,6,-0.0122,0.0170,0.0762,1
+GILD,Gilead Sciences,13,-0.0075,0.0161,0.0339,0
+SNY,Sanofi,6,-0.0063,0.0155,0.0371,0
+NVS,Novartis Pharmaceuticals,9,0.0014,0.0144,0.0366,0
+SNY,Kadmon Corporation, LLC,3,0.0144,0.0144,0.0392,0
+RHHBY,Genentech, Inc.,10,0.0033,0.0126,0.0313,0
+JNJ,Actelion,7,-0.0061,0.0102,0.0278,0

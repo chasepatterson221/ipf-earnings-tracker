@@ -1,6 +1,6 @@
 """
 Populate trial_events table from Project 1's trials + sponsors data.
-Extracts key milestone dates (start, primary completion, termination)
+key milestone dates (start, primary completion, termination)
 for publicly-traded sponsors only, since those are the ones we can
 match against stock price data.
 """

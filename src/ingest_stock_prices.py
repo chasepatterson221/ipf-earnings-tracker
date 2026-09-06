@@ -66,7 +66,7 @@ def insert_prices(cur, ticker, df):
                 float(row["High"]) if pd.notna(row["High"]) else None,
                 float(row["Low"]) if pd.notna(row["Low"]) else None,
                 float(row["Close"]) if pd.notna(row["Close"]) else None,
-                float(row["Adj Close"]) if "Adj Close" in row and pd.notna(row["Adj Close"]) else None,
+                float(row["Close"]) if pd.notna(row["Close"]) else None,
                 int(row["Volume"]) if pd.notna(row["Volume"]) else None,
             ))
             inserted += 1
