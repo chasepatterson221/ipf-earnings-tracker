@@ -100,3 +100,29 @@ A few things worth being upfront about:
 
 **The earnings piece isn't built yet, and that was a deliberate call.** Analyst consensus estimates — what Wall Street was expecting before an earnings report — aren't in SEC EDGAR, which only has actual reported numbers. Getting clean consensus data means either a paid provider like Bloomberg or FactSet, or scraping from sources with inconsistent coverage.
 ---
+
+## Repo structure
+
+<pre>
+ipf-earnings-tracker/
+├── sql/
+│ ├── 01_schema.sql # New table definitions
+│ └── 02_car_analysis.sql # CAR analysis queries
+├── src/
+│ ├── ingest_stock_prices.py # yfinance price ingestion
+│ ├── populate_trial_events.py # Extract milestones from Project 1
+│ └── event_study.py # CAR computation and write-back
+├── exports/
+│ ├── car_by_phase.csv
+│ ├── car_by_sponsor.csv
+│ └── significant_events.csv
+└── README.md
+</pre>
+
+---
+
+## How this connects to Project 1
+
+This project couldn't exist without the [IPF/PF Clinical Trial Intelligence Database](https://github.com/chasepatterson221/ipf-trial-intelligence). The trial data, sponsor classifications, `publicly_traded` flags, and ticker symbols I built there are the direct input to this event study. I designed both projects together from the start — the bridge field in the sponsors table exists specifically so these two analyses could share data rather than duplicate it.
+
+Together they're trying to answer the same underlying question from two angles: Project 1 asks whether the clinical science on IPF is reflected in how trials are structured and which mechanisms get funded. Project 2 asks whether the financial market reflects that same science in how it prices the companies running those trials.
