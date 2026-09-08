@@ -99,6 +99,7 @@ A few things worth being upfront about:
 **Some sponsor samples are small.** A handful of tickers have fewer than five trial events total, so their mean CAR estimates are noisy. I tried to flag this in the analysis rather than treating every result equally.
 
 **The earnings piece isn't built yet, and that was a deliberate call.** Analyst consensus estimates — what Wall Street was expecting before an earnings report — aren't in SEC EDGAR, which only has actual reported numbers. Getting clean consensus data means either a paid provider like Bloomberg or FactSet, or scraping from sources with inconsistent coverage.
+
 ---
 
 ## Repo structure
